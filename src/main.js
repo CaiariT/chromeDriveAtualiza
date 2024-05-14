@@ -59,8 +59,11 @@ axios.get(versionUrl)
       const urlCompleta = `${urlBase}${versaoAtual}/win64/chromedriver-win64.zip`;
       console.log('URL completa:', urlCompleta);
 
-      const dirPath = process.env.DIR_PATH || path.join(__dirname, '..', 'docs');
-      console.log('Diretório de destino:', dirPath);
+      // Obter a raiz do projeto (usando path.resolve(__dirname))
+      const projectRoot = path.resolve(__dirname);
+
+      // Definir o diretório de destino como a raiz do projeto
+      const dirPath = projectRoot;
 
       // Limpar o diretório de destino antes de extrair os arquivos (opcional)
       // fs.rmdirSync(dirPath, { recursive: true });
@@ -88,5 +91,3 @@ axios.get(versionUrl)
     console.error('Erro ao fazer solicitação HTTP:', error.message);
     process.exit(1); // Encerrar com código de erro
   });
-
-// Run node src/main.js
