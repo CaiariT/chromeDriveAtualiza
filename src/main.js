@@ -10,13 +10,18 @@ async function baixarEDescompactarArquivo(url, destino) {
     const response = await axios({
       method: 'get',
       url: url,
-      responseType: 'stream'
+      responseType: 'stream',
     });
 
     const unzipStream = response.data.pipe(unzipper.Parse());
 
     return new Promise((resolve, reject) => {
-      unzipStream.on('entry', entry => {
+      unzipStream.on('error', (error) => {
+        console.error('Erro ao descompactar o arquivo:', error.message);
+        reject(error);
+      });
+
+      unzipStream.on('entry', (entry) => {
         const fileName = entry.path;
 
         // Ignorar pastas internas do arquivo ZIP
@@ -32,13 +37,9 @@ async function baixarEDescompactarArquivo(url, destino) {
         console.log('Arquivo salvo:', filePath);
       });
 
-      unzipStream.on('close', () => {
+      unzipStream.on('end', () => {
         console.log('Arquivo descompactado com sucesso em:', destino);
         resolve();
-      });
-
-      unzipStream.on('error', error => {
-        reject(error);
       });
     });
   } catch (error) {
@@ -48,7 +49,7 @@ async function baixarEDescompactarArquivo(url, destino) {
 
 const versionUrl = 'https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json';
 axios.get(versionUrl)
-  .then(async response => {
+  .then(async (response) => {
     const jsonData = response.data;
 
     if ('Stable' in jsonData.channels) {
@@ -61,9 +62,9 @@ axios.get(versionUrl)
       const dirPath = process.env.DIR_PATH || path.join(__dirname, '..', 'docs');
       console.log('Diretório de destino:', dirPath);
 
-      // Limpar o diretório de destino antes de extrair os arquivos
-      fs.rmdirSync(dirPath, { recursive: true });
-      console.log('Diretório de destino limpo:', dirPath);
+      // Limpar o diretório de destino antes de extrair os arquivos (opcional)
+      // fs.rmdirSync(dirPath, { recursive: true });
+      // console.log('Diretório de destino limpo:', dirPath);
 
       // Criar o diretório de destino se não existir
       if (!fs.existsSync(dirPath)) {
@@ -83,7 +84,9 @@ axios.get(versionUrl)
       console.log('Não existe versão estável disponível.');
     }
   })
-  .catch(error => {
+  .catch((error) => {
     console.error('Erro ao fazer solicitação HTTP:', error.message);
     process.exit(1); // Encerrar com código de erro
   });
+
+// Run node src/main.js
