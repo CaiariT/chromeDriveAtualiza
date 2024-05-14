@@ -1,0 +1,19 @@
+name: Verificar versão estável do Chrome
+on:
+  push:
+    branches: [ main ]
+jobs:
+  verificar-versao:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Instalar Node.js (versão mais recente LTS)
+        uses: actions/setup-node@v3
+        
+      - name: Instalar dependências
+        run: npm install
+
+      - name: Verificar versão estável do Chrome
+        run: node src/main.js
