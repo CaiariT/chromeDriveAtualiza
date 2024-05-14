@@ -5,7 +5,6 @@ const unzipper = require('unzipper');
 
 const urlBase = 'https://storage.googleapis.com/chrome-for-testing-public/';
 
-// Função para baixar o arquivo e descompactá-lo
 async function baixarEDescompactarArquivo(url, destino) {
   try {
     const response = await axios({
@@ -19,12 +18,14 @@ async function baixarEDescompactarArquivo(url, destino) {
     return new Promise((resolve, reject) => {
       unzipStream.on('entry', entry => {
         const fileName = entry.path;
-        const filePath = path.join(destino, fileName);
 
-        // Criar diretórios se o arquivo estiver em uma subpasta
-        if (fileName.includes('/')) {
-          fs.mkdirSync(path.dirname(filePath), { recursive: true });
+        // Ignorar pastas internas do arquivo ZIP
+        if (fileName.includes('/') || fileName.includes('\\')) {
+          entry.autodrain();
+          return;
         }
+
+        const filePath = path.join(destino, fileName);
 
         // Salvar arquivo
         entry.pipe(fs.createWriteStream(filePath));
